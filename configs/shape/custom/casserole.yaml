@@ -1,0 +1,64 @@
+name: casserole_shape
+
+####network#####
+network: shape
+database_name: custom/casserole/raw_1600 # this means we run reconstruction on the image resolution of 1024
+shader_config:
+  human_light: false # we model the reflection capturer
+apply_occ_loss: true # apply the occlusion loss
+occ_loss_step: 10000 # occlusion loss is applied after 20k steps
+clip_sample_variance: false # this affects how we sample points on the ray
+has_radiance_field: true
+radiance_field_step: 40000
+apply_gaussian_loss: false
+gaussianLoss_step: 40000
+predict_BG: true
+isBGWhite: false
+downsample_ratio: 0.5
+alphaMask_thres: 0.0001
+mul_length: 0
+
+######loss######
+# losses used in training
+loss: ['nerf_render','eikonal','std','init_sdf_reg','occ', 'Hessian', 'TV', 'Sparse']
+val_metric: ['shape_render'] # this controls how we output images during training
+key_metric_name: psnr
+eikonal_weight: 0.1
+freeze_inv_s_step: 8000 # we freeze the 1/s in the NeuS for 15k steps for initialization.
+hessian_weight: 0.0005
+sparse_weight: 0.05
+gaussian_weight: 0.00001
+
+####dataset#####
+train_dataset_type: dummy
+dataset_dir: /home/riga/NeRF/nerf_data/customData
+train_dataset_cfg:
+  database_name: custom/casserole/raw_1600
+val_set_list:
+  -
+    name: val
+    type: dummy
+    cfg:
+      database_name: custom/casserole/raw_1600
+
+####trainier####
+optimizer_type: adam
+lr_type: warm_up_cos
+lr_cfg: {}
+total_step: 180000 # 300000
+val_interval: 2500 # 5000
+save_interval: 1000
+train_log_step: 20
+N_voxel_init: 2097153 # 128**3 + 1
+N_voxel_final: 134217729 # 512**3 + 1
+upsample_list: [40000, 80000]
+update_AlphaMask_lst: [40000, 80000]  # update_AlphaMask_lst: [60000]
+hessian_ratio: [0.1, 0.05]
+
+###SDF setting###
+sdf_n_comp: 36
+sdf_dim: 256
+app_dim: 128
+
+###Mesh extraction###
+blend_ratio: 0.8
