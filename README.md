@@ -1,5 +1,5 @@
 # TensoSDF
-[SIGGRAPH 2024] TensoSDF: Roughness-aware Tensorial Representation for Robust Geometry and Material Reconstruction
+TensoSDF: Roughness-aware Tensorial Representation for Robust Geometry and Material Reconstruction
 
 The method is based on NeRO, please refer to it to setup the environment.
 
