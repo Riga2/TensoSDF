@@ -4,7 +4,7 @@ TensoSDF: Roughness-aware Tensorial Representation for Robust Geometry and Mater
 The method is based on NeRO, please refer to it to setup the environment.
 
 ### Datasets
-Download the TensoSDF synthetic datasets and the ORB real datasets...
+Download the [TensoSDF synthetic datasets](https://drive.google.com/file/d/1JI2kMvi_79JIUBGbUBckxeCAgrWEW0kl/view?usp=drive_link) and the [ORB real datasets](https://stanfordorb.github.io/). For the ORB dataset, We use the *blender_LDR.tar.gz* for training and *ground_truth.tar.gz* for evaluation.
 
 ### Geometry reconstruction
 
