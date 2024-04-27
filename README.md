@@ -72,6 +72,5 @@ python eval_mat.py --cfg configs/mat/orb/teapot.yaml --blender your_blender_path
 
 # evaluate the relighting results via PSNR, SSIM and LPIPS metrics
 python eval_orb_relight.py --relight_dir your_relighting_results_dir --gt_dir your_GT_relighting_in_orb_dataset_dir
-e.g., python eval_orb_relight.py --relight_dir
 ```
 Intermediate results will be saved at ```data/train_vis```. Models will be saved at ```data/model```. Extracted materials will be saved at ```data/materials```. Relighting results will be saved at ```data/relight```.
