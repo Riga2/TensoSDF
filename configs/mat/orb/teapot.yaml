@@ -4,7 +4,7 @@ isMaterial: true
 ####network#####
 network: material
 database_name: orb/teapot_scene006
-mesh: data/meshes/orb/teapot_scene006_shape-180000.ply
+mesh: data/meshes/teapot_scene006_shape-180000.ply
 geo_model_path: data/model/teapot_scene006_shape/model.pth
 # split_manul: true
 nerfDataType: true
@@ -27,7 +27,7 @@ key_metric_name: psnr
 
 ####dataset#####
 train_dataset_type: dummy
-dataset_dir: /nerf_data/llff/blender_LDR           # !!!! change your dataset dir !!!!
+dataset_dir: /home/riga/NeRF/nerf_data/blender_LDR           # !!!! change your dataset dir !!!!
 train_dataset_cfg:
   database_name: orb/teapot_scene006
 val_set_list:

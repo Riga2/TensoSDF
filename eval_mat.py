@@ -151,10 +151,10 @@ class MaterialTester:
                 subprocess.run(cmds)
             self.eval_relight_results()
         elif self.database_type == 'orb':
-            save_dir_name = f'{self.scene_name}_relighting_{self.orb_settings['orb_relight_env_name']}'
+            save_dir_name = f'{self.scene_name}_relighting_{self.orb_settings["orb_relight_env_name"]}'
             relight_save_dir = f'data/relight/orb/noScale/{save_dir_name}'
-            env_dir = f'{self.orb_settings['orb_relight_gt_dir']}/{self.orb_settings['orb_relight_env_name']}/env_map'
-            pose_dir = f'{self.orb_settings['orb_blender_dir']}/{self.scene_name}'
+            env_dir = f'{self.orb_settings["orb_relight_gt_dir"]}/{self.orb_settings["orb_relight_env_name"]}/env_map'
+            pose_dir = f'{self.orb_settings["orb_blender_dir"]}/{self.scene_name}'
             cmds=[
                 self.blender_path, '--background', '--python', 'blender_backend/relight_backend.py', '--',
                 '--output', relight_save_dir,

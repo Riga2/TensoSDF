@@ -206,16 +206,18 @@ def eval_relight(relight_dir, gt_dir):
     avg_PSNR /= num
     avg_SSIM /= num
     avg_LPIPS /= num
-    msg += f'Avg_psnr: {avg_PSNR}, avg_ssim: {avg_SSIM}, avg_lpips: {avg_LPIPS}\n'
+    avg_info = f'Avg_psnr: {avg_PSNR}, avg_ssim: {avg_SSIM}, avg_lpips: {avg_LPIPS}\n'
+    msg += avg_info
+    print(avg_info)
     with open(f'{save_dir}/metrics_record.txt', 'a') as f:
         f.write(msg)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     
-    parser.add_argument('--relight_dir', type=str, default='data/relight/orb/noScale/cactus_scene001_relighting_cactus_scene007',
+    parser.add_argument('--relight_dir', type=str, default='data/relight/orb/noScale/teapot_scene006_relighting_teapot_scene001',
                         help='relighted images from blender')
-    parser.add_argument('--gt_dir', type=str, default='/home/riga/NeRF/nerf_data/blender_LDR/cactus_scene007',
+    parser.add_argument('--gt_dir', type=str, default='/home/riga/NeRF/nerf_data/blender_LDR/teapot_scene001',
                         help='ground truth relighting images from orb LDR datasets')
 
     flags = parser.parse_args()

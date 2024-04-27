@@ -1,5 +1,5 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = '3'
+os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 import argparse
 from humanfriendly import format_timespan
 
@@ -11,7 +11,7 @@ import numpy as np
 import time
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--cfg', type=str, default='configs/shape/custom/goldenqilin.yaml')
+parser.add_argument('--cfg', type=str, default='configs/shape/syn/compressor.yaml')
 # parser.add_argument('--cfg', type=str, default='configs/mat/syn/compressor.yaml')
 flags = parser.parse_args()
 
