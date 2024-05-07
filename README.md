@@ -74,3 +74,16 @@ python eval_mat.py --cfg configs/mat/orb/teapot.yaml --blender your_blender_path
 python eval_orb_relight.py --relight_dir your_relighting_results_dir --gt_dir your_GT_relighting_in_orb_dataset_dir
 ```
 Intermediate results will be saved at ```data/train_vis```. Models will be saved at ```data/model```. Extracted materials will be saved at ```data/materials```. Relighting results will be saved at ```data/relight```.
+
+## BibTeX
+```
+@article{Li:2024:TensoSDF,
+  title={TensoSDF: Roughness-aware Tensorial Representation for Robust Geometry and Material Reconstruction},
+  author={Jia Li and Lu Wang and Lei Zhang and Beibei Wang},
+  journal ={ACM Transactions on Graphics (Proceedings of SIGGRAPH 2024)},
+  year = {2024},
+  volume = {43},
+  number = {4},
+  pages={150:1--13}
+)
+```
