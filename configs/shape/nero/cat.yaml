@@ -1,45 +1,44 @@
-name: horse_shape
+name: cat_shape
 
 ####network#####
 network: shape
-database_name: syn/horse
+database_name: syn/cat
 split_manul: false
 nerfDataType: false
 apply_occ_loss: true
 occ_loss_step: 10000 # 20000
-apply_mask_loss: false
+apply_mask_loss: true
 clip_sample_variance: false
 has_radiance_field: true
 radiance_field_step: 20000
 apply_gaussian_loss: false
 gaussianLoss_step: 20000
-predict_BG: true
+predict_BG: false
 isBGWhite: false
 downsample_ratio: 0.5
 alphaMask_thres: 0.0001
 mul_length: 0
 
 ######loss######
-loss: ['nerf_render','eikonal', 'std', 'init_sdf_reg','occ', 'Sparse', 'TV', 'Hessian']
+loss: ['nerf_render','eikonal', 'std', 'init_sdf_reg','occ', 'Sparse', 'TV', 'Hessian', 'mask']
 val_metric: ['shape_render']
 key_metric_name: psnr
 eikonal_weight: 0.1
 hessian_weight: 0.0005
-sparse_weight: 0.05
-
+sparse_weight: 0.01
 
 ####dataset#####
 train_dataset_type: dummy
 dataset_dir: /home/riga/NeRF/nerf_data/GlossySynthetic           # !!!! change your dataset dir !!!!
 train_dataset_cfg:
-  database_name: syn/horse
+  database_name: syn/cat
   split_manul: false
 val_set_list:
   -
     name: val
     type: dummy
     cfg:
-      database_name: syn/horse
+      database_name: syn/cat
       split_manul: false
 
 ####trainier####

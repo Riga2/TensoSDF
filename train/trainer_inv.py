@@ -50,7 +50,6 @@ class TrainerInv:
         'sdf_dim' : 128,
         'app_dim' : 128,
         'upsample_list' : None,
-        'hessian_ratio': [0.5, 0.1],
         'update_AlphaMask_lst' : None,
         'hessian_update_list': None,
         'sparse_update_list': None,

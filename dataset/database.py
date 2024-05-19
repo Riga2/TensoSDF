@@ -258,7 +258,9 @@ class GlossySyntheticDatabase(BaseDatabase):
         self.scale_factor = 1.0
 
     def get_image(self, img_id):
-        return imread(f'{self.root}/{img_id}.png')[...,:3]
+        img = imread(f'{self.root}/{img_id}.png')[...,:3]
+        mask = self.get_mask(img_id)[..., None]
+        return img * mask
 
     def get_K(self, img_id):
         K = self.cams[int(img_id)][1]
@@ -281,7 +283,7 @@ class GlossySyntheticDatabase(BaseDatabase):
         return depth, mask
 
     def get_mask(self, img_id):
-        raise NotImplementedError
+        return self.get_depth(img_id)[1]
 
 class NeRFSynDatabase(BaseDatabase):
     def __init__(self, database_name, dataset_dir, isTest=False, isWhiteBG=True):

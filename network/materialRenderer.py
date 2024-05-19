@@ -600,18 +600,21 @@ class MaterialRenderer(nn.Module):
             coords = coords.reshape(1, h * w, 2)
             coords = torch.cat([coords + 0.5, torch.ones(1, h * w, 1, dtype=torch.float32, device=device)], 2)  # 1,h*w,3
             # 1,h*w,3 @ imn,3,3 => 1,h*w,3
-            dirs = coords @ torch.inverse(K).permute(0, 2, 1)      
-            rays_o = (poses[:, :, :3].permute(0, 2, 1) @ -poses[:, :, 3:]).permute(2, 1, 0)        # 1, 3, 1
-            rays_d = (poses[:, :, :3].permute(0, 2, 1) @ dirs.permute(1, 2, 0)).permute(2, 1, 0)   # 1, 3, rn
-            rays_o = rays_o.repeat(1, h*w, 1)   # 1, 3, rn
+            dirs = coords @ torch.inverse(K).permute(0, 2, 1)
+            rays_d = F.normalize(dirs, dim=-1).reshape(-1, 3)     # rn,3
+            rays_d = poses[:, :, :3].permute(0, 2, 1) @ rays_d.unsqueeze(-1)
+            rays_d = rays_d[..., 0]  # rn,3
             rays_d = F.normalize(rays_d, dim=-1)
+            
+            rays_o = (poses[:, :, :3].permute(0, 2, 1) @ -poses[:, :, 3:])[:, :, 0]        # 1, 3
+            rays_o = rays_o.repeat(h*w, 1)   # rn, 3
 
-            human_poses = self.get_human_coordinate_poses(pose) # imn,3,4
+            human_poses = self.get_human_coordinate_poses(poses) # imn,3,4
             human_poses = human_poses.unsqueeze(1).repeat(1,h*w,1,1) # imn,h*w,3,4
                                    
             ray_batch = {
-                'rays_o': rays_o[0].to(device),
-                'rays_d': rays_d[0].to(device),       
+                'rays_o': rays_o.to(device),
+                'rays_d': rays_d.to(device),       
                 'human_poses': human_poses[0].to(device),         
             }
             return ray_batch

@@ -15,7 +15,7 @@ from utils.base_utils import color_map_forward, downsample_gaussian_blur
 from utils.raw_utils import linear_to_srgb
 import time
 
-def build_imgs_info(database:BaseDatabase, img_ids, is_nerf=False):
+def build_imgs_info(database:BaseDatabase, img_ids, apply_mask_loss=False):
     images = [database.get_image(img_id) for img_id in img_ids]
     poses = [database.get_pose(img_id) for img_id in img_ids]
     Ks = [database.get_K(img_id) for img_id in img_ids]
@@ -30,7 +30,7 @@ def build_imgs_info(database:BaseDatabase, img_ids, is_nerf=False):
         'poses': poses,
     }
 
-    if is_nerf:
+    if apply_mask_loss:
         masks = [database.get_depth(img_id)[1] for img_id in img_ids]
         masks = np.stack(masks, 0)
         imgs_info['masks'] = masks
@@ -357,13 +357,13 @@ class ShapeRenderer(nn.Module):
         self.train_ids, self.test_ids = get_database_split(self.database, split_manul=self.cfg['split_manul'])
         self.train_ids = np.asarray(self.train_ids)
 
-        self.train_imgs_info = build_imgs_info(self.database, self.train_ids, is_nerf=self.cfg['nerfDataType'])
+        self.train_imgs_info = build_imgs_info(self.database, self.train_ids, apply_mask_loss=self.cfg['apply_mask_loss'])
         self.train_imgs_info = imgs_info_to_torch(self.train_imgs_info, 'cpu')
         b, _, h, w = self.train_imgs_info['imgs'].shape
         print(f'training size {h} {w} ...')
         self.train_num = len(self.train_ids)
 
-        self.test_imgs_info = build_imgs_info(self.database, self.test_ids, is_nerf=self.cfg['nerfDataType'])
+        self.test_imgs_info = build_imgs_info(self.database, self.test_ids, apply_mask_loss=self.cfg['apply_mask_loss'])
         self.test_imgs_info = imgs_info_to_torch(self.test_imgs_info, 'cpu')
         self.test_num = len(self.test_ids)
         print(f'Acutal splits num: train -> {self.train_num}, val -> {self.test_num}')
@@ -374,7 +374,7 @@ class ShapeRenderer(nn.Module):
         if self.cfg['nerfDataType']:
             self.train_batch, _, _, _ = self._construct_ray_batch_nerf(self.train_imgs_info)        
         else:    
-            self.train_batch, _, _, _ = self._construct_ray_batch(self.train_imgs_info)
+            self.train_batch, _, _, _ = self._construct_ray_batch(self.train_imgs_info, apply_mask=self.cfg['apply_mask_loss'])
         
         self.filtering_train_rays()
         self._shuffle_train_batch()
@@ -385,7 +385,7 @@ class ShapeRenderer(nn.Module):
         for k, v in self.train_batch.items():
             self.train_batch[k] = v[shuffle_idxs]
 
-    def _construct_ray_batch(self, imgs_info, device='cpu'):
+    def _construct_ray_batch(self, imgs_info, device='cpu', apply_mask=False):
         imn, _, h, w = imgs_info['imgs'].shape
         coords = torch.stack(torch.meshgrid(torch.arange(h), torch.arange(w)), -1)[:, :, (1, 0)]  # h,w,2
         coords = coords.to(device)
@@ -418,6 +418,10 @@ class ShapeRenderer(nn.Module):
             'rgbs': imgs,
             'human_poses': human_poses,
         }
+
+        if apply_mask:
+            masks = imgs_info['masks'].reshape(imn, h * w).float().reshape(rn, 1).to(device)
+            ray_batch['masks'] = masks
         return ray_batch, rn, h, w
 
     def _construct_ray_batch_nerf(self, imgs_info, device='cpu', is_train=True):
@@ -454,55 +458,6 @@ class ShapeRenderer(nn.Module):
             masks = imgs_info['masks'].reshape(imn, h * w).float().reshape(rn, 1).to(device)
             ray_batch['masks'] = masks
         return ray_batch, rn, h, w
-
-    def _construct_ray_batch_neilfpp(self, imgs_info, device='cpu'):
-        def lift(x, y, z, intrinsics):
-            ''' Project a point from image space to camera space (for Tensor object) '''
-            # For Tensor object
-            # parse intrinsics
-            fx = intrinsics[:, 0, 0].unsqueeze(1)                                           # [N,1]
-            fy = intrinsics[:, 1, 1].unsqueeze(1)                                           # [N,1]
-            cx = intrinsics[:, 0, 2].unsqueeze(1)                                           # [N,1]
-            cy = intrinsics[:, 1, 2].unsqueeze(1)                                           # [N,1]
-            sk = intrinsics[:, 0, 1].unsqueeze(1)                                           # [N,1]
-
-            x_lift = (x - cx + cy * sk / fy - sk * y / fy) / fx * z                         # [N,1]
-            y_lift = (y - cy) / fy * z                                                      # [N,1]
-
-            # homogeneous coordinate
-            return torch.stack([x_lift, y_lift, z, torch.ones_like(z).to(device)], dim=1)       # [N, 4, 1]
-
-        imn, _, h, w = imgs_info['imgs'].shape
-        Ks = imgs_info['Ks']            # N, 4, 4
-        pose = imgs_info['poses']
-        cam_loc = pose[:, 0:3, 3]                                                       # [N, 3]
-        p = pose                                                                        # [N, 4, 4]
-        # uv coordinate
-        uv = np.mgrid[0:h, 0:w]
-        uv = torch.from_numpy(np.flip(uv, axis=0).copy()).float().to(device)
-        uv = uv.reshape(2, -1).transpose(1, 0).repeat([imn, 1])                              # N*h*w, 2
-
-        x_cam, y_cam = uv[:, 0:1], uv[:, 1:2]
-        z_cam = torch.ones_like(uv[:, 0:1]).to(device)                  # N*h*w, 1
-        intrinsics = Ks.repeat(h*w, 1, 1)                               # N*h*w, 4, 4
-        pixel_points_cam = lift(x_cam, y_cam, z_cam, intrinsics)        # [N*h*w, 4, 1]
-
-        p = p.repeat(h*w, 1, 1)                                         # N*h*w, 4, 4
-        # [N*h*w,4,4] @ [N*h*w,4,1] -> [N*h*w,4,1] -> [N*h*w,3]
-        world_coords = torch.bmm(p, pixel_points_cam)[:, 0:3, 0]        # [N*h*w,3]
-        ray_o = cam_loc.repeat(h*w, 1)                                  # [N*h*w,3]
-        ray_dirs = world_coords - ray_o
-        ray_dirs = F.normalize(ray_dirs, dim=1)                         # [N*h*w,3]
-        imgs = imgs_info['imgs'].permute(0, 2, 3, 1).reshape(imn, h * w, 3)  # imn,h*w,3
-        
-        ray_batch = {
-            'dirs': ray_dirs.reshape(-1, 3).to(device),
-            'rays_o': ray_o.reshape(-1, 3).to(device),
-            'rgbs': imgs.reshape(-1, 3).to(device),
-        }
-        rn = imn*h*w
-        return ray_batch, rn, h, w
-
 
     def get_human_coordinate_poses(self, poses):
         pn = poses.shape[0]
@@ -762,7 +717,7 @@ class ShapeRenderer(nn.Module):
         if self.cfg['has_radiance_field'] and step > self.cfg['radiance_field_step']:
             outputs['loss_radiance'] = self.compute_rgb_loss(outputs['radiance'], train_ray_batch['rgbs']) * outputs['roughness_weights']  # ray_loss
             outputs['loss_rgb'] = outputs['loss_rgb'] * (1.0 - outputs['roughness_weights'])
-        if self.cfg['nerfDataType'] and self.cfg['apply_mask_loss']:
+        if self.cfg['apply_mask_loss']:
             outputs['loss_mask'] = F.binary_cross_entropy(outputs['acc'].clip(1e-3, 1.0 - 1e-3), (train_ray_batch['masks'] > 0.5).float())
         return outputs
 

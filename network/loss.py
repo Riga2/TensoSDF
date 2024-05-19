@@ -104,7 +104,8 @@ class Sparse_Loss(Loss):
 
 class Hessian_Loss(Loss):
     default_cfg={
-        'hessian_weight' : 5e-4
+        'hessian_weight' : 5e-4,
+        'hessian_ratio': [1.0, 1.0],
     }
     def __init__(self, cfg):
         self.cfg={**self.default_cfg,**cfg}

@@ -1,9 +1,17 @@
-# TensoSDF
-TensoSDF: Roughness-aware Tensorial Representation for Robust Geometry and Material Reconstruction
+## TensoSDF: Roughness-aware Tensorial Representation for Robust Geometry and Material Reconstruction (SIGGRAPH 2024)
+
+### [Paper](https://arxiv.org/abs/2402.02771) | [Project page](https://wangningbei.github.io/2024/TensoSDF.html)
+
+![Teaser](https://github.com/Riga2/TensoSDF/blob/main/user-imgs/teaser.png)
 
 The method is based on NeRO, please refer to it to setup the environment.
+And then use pip to install the requirements.txt in this project.
+```
+cd TensoSDF
+pip install -r requirements.txt
+```
 
-### Datasets
+## Datasets
 Download the [TensoSDF synthetic dataset](https://drive.google.com/file/d/1JI2kMvi_79JIUBGbUBckxeCAgrWEW0kl/view?usp=drive_link) and the [ORB real dataset](https://stanfordorb.github.io/). For the ORB dataset, We use the *blender_LDR.tar.gz* for training and *ground_truth.tar.gz* for evaluation.
 
 ## TensoSDF synthetic dataset
@@ -74,3 +82,16 @@ python eval_mat.py --cfg configs/mat/orb/teapot.yaml --blender your_blender_path
 python eval_orb_relight.py --relight_dir your_relighting_results_dir --gt_dir your_GT_relighting_in_orb_dataset_dir
 ```
 Intermediate results will be saved at ```data/train_vis```. Models will be saved at ```data/model```. Extracted materials will be saved at ```data/materials```. Relighting results will be saved at ```data/relight```.
+
+## BibTeX
+```
+@article{Li:2024:TensoSDF,
+  title={TensoSDF: Roughness-aware Tensorial Representation for Robust Geometry and Material Reconstruction},
+  author={Jia Li and Lu Wang and Lei Zhang and Beibei Wang},
+  journal ={ACM Transactions on Graphics (Proceedings of SIGGRAPH 2024)},
+  year = {2024},
+  volume = {43},
+  number = {4},
+  pages={150:1--13}
+}
+```
