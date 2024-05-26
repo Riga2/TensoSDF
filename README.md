@@ -1,6 +1,6 @@
 ## TensoSDF: Roughness-aware Tensorial Representation for Robust Geometry and Material Reconstruction (SIGGRAPH 2024)
 
-### [Paper](https://arxiv.org/abs/2402.02771) | [Project page](https://wangningbei.github.io/2024/TensoSDF.html)
+### [Paper](https://arxiv.org/abs/2402.02771) | [Project page](https://riga2.github.io/tensosdf/)
 
 ![Teaser](https://github.com/Riga2/TensoSDF/blob/main/user-imgs/teaser.png)
 
