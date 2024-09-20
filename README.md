@@ -4,7 +4,7 @@
 
 ![Teaser](https://github.com/Riga2/TensoSDF/blob/main/user-imgs/teaser.png)
 
-The method is based on NeRO, please refer to it to setup the environment.
+The method is based on [NeRO](https://github.com/liuyuan-pal/NeRO), please refer to it to setup the environment.
 And then use pip to install the requirements.txt in this project.
 ```
 cd TensoSDF
